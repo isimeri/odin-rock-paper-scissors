@@ -1,5 +1,20 @@
 //rock = 0 --- paper = 1 --- scissors = 2
 const choiceArray = ['rock', 'paper', 'scissors'];
+//initial score
+const globalScore = {
+    userScore: 0,
+    computerScore: 0,
+    results: []
+}
+let round = 0;
+let roundOld = 0;
+
+const resultsDetails = document.querySelector('.results-details');
+const resultsHeader = document.querySelector('.results-header');
+const rockBtn = document.querySelector('#rock');
+const paperBtn = document.querySelector('#paper');
+const scissorsBtn = document.querySelector('#scissors');
+const choicesElems = Array.from(document.querySelectorAll('.choice'));
 
 //turns bruh into Bruh
 function capitalize(str){
@@ -22,8 +37,8 @@ function compare(userChoice, computerChoice){
     const computerNum = choiceArray.indexOf(computerChoice);
 
     //rock becomes Rock etc.
-    const userChoiceCap = capitalize(choiceArray[userNum]);
-    const computerChoiceCap = capitalize(choiceArray[computerNum]);
+    const userChoiceCap = capitalize(userChoice);
+    const computerChoiceCap = capitalize(computerChoice);
     let result;
 
     //same number, same word, it's a tie
@@ -56,48 +71,69 @@ function compare(userChoice, computerChoice){
 
 
 
-function round(){
+function playRound(userChoice){
 
-    let userChoice = prompt('Choose: "rock", "paper" or "scissors"');
-    //keeps prompting the user for input if the input didn't look anything like "rock", "PAPER" or "sCiSSorS"
-    while(userChoice.toLowerCase() !== 'rock' && userChoice.toLowerCase() !== 'paper' && userChoice.toLowerCase() !== 'scissors'){
-        userChoice = prompt('That was hilarious. Now choose "rock", "paper" or "scissors"');
-    }
     //the computer makes a choice
     const computerChoice = computerChoose();
+    console.log('playRound userchoice ', userChoice);
 
     //the choices are compared and an object containing the scores and the result description comes back
-    const resultObj = compare(userChoice.toLowerCase(), computerChoice);
+    const resultObj = compare(userChoice, computerChoice);
     return resultObj;
 }
 
-function game(){
-    //the length of the game
-    const rounds = 5;
-    //initial score
-    const score = {
-        userScore: 0,
-        computerScore: 0
-    }
+//adds the current score to the global score and to the frontend
+function addRoundScore(choice){
 
-    //for each round, add the scores to the total and display the total score and the result description to the console
-    for(let i = 0; i < rounds; i++){
-        let roundResult = round();
-        score.userScore += roundResult.userScore;
-        score.computerScore += roundResult.computerScore;
+    const roundScore = playRound(choice);
+    globalScore.userScore += roundScore.userScore;
+    globalScore.computerScore += roundScore.computerScore;
+    globalScore.results.push(roundScore.text);
+    round++;
 
-        console.log(roundResult.text);
-        console.log(`You: ${score.userScore} | Computer: ${score.computerScore}`);
-    }
-
-    //Decides the winner of the entire game
-    if(score.userScore > score.computerScore){
-        console.log('Yay, u r winnar!');
-    } else if (score.userScore < score.computerScore) {
-        console.log('You is lose, oh no...');
-    } else {
-        console.log('It would seem that a tie is what is happenning here.');
+    if(round > roundOld){
+        const liRoundResult = document.createElement('li');
+        liRoundResult.textContent = `Round ${round}: ${globalScore.results[round-1]}`;
+        resultsDetails.appendChild(liRoundResult);
+        roundOld = round;
     }
 }
 
-game();
+function checkForWin(){
+
+    if(globalScore.computerScore < 5 && globalScore.userScore < 5)
+        return false;
+
+    if(globalScore.userScore > globalScore.computerScore){
+        resultsHeader.textContent = 'Yay, u r winnar!';
+    } else if (globalScore.userScore < globalScore.computerScore) {
+        resultsHeader.textContent = 'You is lose, oh no...';
+    } else {
+        resultsHeader.textContent = 'It would seem that a tie is what is happenning here.';
+    }
+    return true;
+}
+
+function handleClickChoice(){
+    addRoundScore(this.id);
+    const win = checkForWin();
+    if(win){
+        endGame();
+    }
+}
+
+function initGame(){
+
+    choicesElems.forEach(choiceElem => {
+        choiceElem.addEventListener('click', handleClickChoice);
+    });
+}
+
+function endGame(){
+
+    choicesElems.forEach(choiceElem => {
+        choiceElem.removeEventListener('click', addRoundScore);
+    });
+}
+
+initGame();
