@@ -11,6 +11,8 @@ let roundOld = 0;
 
 const resultsDetails = document.querySelector('.results-details');
 const resultsHeader = document.querySelector('.results-header');
+const userScoreSpan = document.querySelector('.user-score');
+const computerScoreSpan = document.querySelector('.computer-score');
 const rockBtn = document.querySelector('#rock');
 const paperBtn = document.querySelector('#paper');
 const scissorsBtn = document.querySelector('#scissors');
@@ -93,7 +95,17 @@ function addRoundScore(choice){
 
     if(round > roundOld){
         const liRoundResult = document.createElement('li');
-        liRoundResult.textContent = `Round ${round}: ${globalScore.results[round-1]}`;
+        const spanElem = document.createElement('span');
+        const textNode = document.createTextNode(`: ${globalScore.results[round-1]}`);
+
+        userScoreSpan.textContent = globalScore.userScore;
+        computerScoreSpan.textContent = globalScore.computerScore;
+
+        spanElem.textContent = `Round ${round}`;
+        spanElem.classList.add('bold');
+
+        liRoundResult.appendChild(spanElem);
+        liRoundResult.appendChild(textNode);
         resultsDetails.appendChild(liRoundResult);
         roundOld = round;
     }
@@ -132,7 +144,7 @@ function initGame(){
 function endGame(){
 
     choicesElems.forEach(choiceElem => {
-        choiceElem.removeEventListener('click', addRoundScore);
+        choiceElem.removeEventListener('click', handleClickChoice);
     });
 }
 
